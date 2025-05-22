@@ -1,0 +1,8 @@
+flask
+yfinance
+pandas
+ta
+openai
+requests
+feedparser
+mangum
