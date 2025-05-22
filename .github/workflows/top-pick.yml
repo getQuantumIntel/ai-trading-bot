@@ -1,0 +1,20 @@
+name: Top Pick
+
+on:
+  schedule:
+    - cron: '50 00 * * 1-5'   # 20:50 ET Mon–Fri → 00:50 UTC next day
+  workflow_dispatch:
+
+jobs:
+  top-pick:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with: { python-version: '3.x' }
+      - run: pip install -r requirements.txt
+      - run: python top_pick_script.py
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          OPENAI_API_KEY:    ${{ secrets.OPENAI_API_KEY }}
+          BOT_SECRET_TOKEN:  ${{ secrets.BOT_SECRET_TOKEN }}
