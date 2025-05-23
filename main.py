@@ -189,6 +189,56 @@ Return the analysis in a markdown-style format suitable for Discord.
     except Exception as e:
         return f"GPT trend error: {str(e)}"
 
+def generate_market_forecast():
+    # Load the last 2 daily summaries
+    try:
+        with open("daily_summaries.txt", "r") as f:
+            daily_logs = f.read().strip()
+    except FileNotFoundError:
+        daily_logs = ""
+
+    # Load the most recent trend report
+    try:
+        with open("trend_reports.txt", "r") as f:
+            trend_logs = f.read().strip()
+    except FileNotFoundError:
+        trend_logs = ""
+
+    # Extract the last two summaries and the last trend
+    recent_summaries = daily_logs.split("\n\n🗓️ ")
+    last_two = "\n\n".join("🗓️ " + s for s in recent_summaries[-2:] if s)
+    recent_trends = trend_logs.split("\n\n🗓️ ")
+    last_trend = "🗓️ " + recent_trends[-1] if recent_trends and recent_trends[-1] else ""
+
+    prompt = f"""
+You are a trading assistant generating a market outlook for tomorrow.
+
+Based on the following:
+1. The last 2 daily market summaries  
+2. The most recent 5-day trend report
+
+Write a short market forecast for the next trading day. Include:
+- Likely momentum or reversals  
+- Stocks to watch  
+- Overall market tone  
+
+---  
+📅 Recent Summaries:  
+{last_two}
+
+📈 Last Trend:  
+{last_trend}
+"""
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.3,
+        )
+        return response.choices[0].message.content.strip()
+    except Exception as e:
+        return f"GPT forecast error: {e}"
+
 def run_bot():
     tz = pytz.timezone('US/Eastern')
     now = datetime.now(tz).strftime("%Y-%m-%d %I:%M %p")
