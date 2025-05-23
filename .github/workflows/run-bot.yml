@@ -30,7 +30,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: run-bot
-        run: python run-bot_script.py
+        run: python run_bot_script.py
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           OPENAI_API_KEY:    ${{ secrets.OPENAI_API_KEY }}
