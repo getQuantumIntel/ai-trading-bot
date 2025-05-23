@@ -443,28 +443,29 @@ def send_to_discord(message):
             print(f"❌ Chunk {i+1} failed. Status: {response.status_code} | Response: {response.text}")
 
 def generate_top_pick_summary():
+    import pandas as pd
+    from datetime import datetime
+
     filename = "signal_log.csv"
     try:
         df = pd.read_csv(filename)
     except FileNotFoundError:
         return "No signals found yet."
 
-    # Filter just today’s rows
-    today_str = datetime.now().strftime("%Y-%m-%d")
-    df_today = df[df["timestamp"].str.startswith(today_str)]
-    if df_today.empty:
-        return "No signals logged for today."
+    if df.empty:
+        return "No signals logged yet."
 
-    # Pick the highest‐scoring row
-    top = df_today.sort_values(by="score", ascending=False).iloc[0]
+    # Always use the most recently logged signal
+    df_sorted = df.sort_values(by="timestamp")
+    top = df_sorted.iloc[-1]
 
-    ticker   = top["ticker"]
-    sector   = top.get("sector", "Unknown")
-    score    = top["score"]
-    sentiment= top.get("sentiment", "N/A")
-    rsi      = top.get("rsi", "N/A")
-    breakout = top.get("breakout", "")
-    price    = top["price"]
+    ticker    = top["ticker"]
+    sector    = top.get("sector", "Unknown")
+    price     = top["price"]
+    score     = top["score"]
+    sentiment = top.get("sentiment", "N/A")
+    rsi       = top.get("rsi", "N/A")
+    breakout  = top.get("breakout", "")
 
     prompt = f"""
 You are an elite trading assistant. Summarize why this stock is today’s best pick:
@@ -481,7 +482,7 @@ Write a 2–3 sentence rationale in confident, hedge-fund-style language.
     try:
         resp = client.chat.completions.create(
             model="gpt-4o",
-            messages=[{"role":"user","content":prompt}],
+            messages=[{"role": "user", "content": prompt}],
             temperature=0.3,
         )
         return f"📌 **Top Trade Pick: [{sector}] {ticker}**\n" + resp.choices[0].message.content.strip()
