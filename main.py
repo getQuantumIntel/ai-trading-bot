@@ -138,7 +138,7 @@ Return a markdown‐style summary suitable for Discord.
 
     try:
         response = client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-4o",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.3,
         )
@@ -190,6 +190,8 @@ Return the analysis in a markdown-style format suitable for Discord.
         return f"GPT trend error: {str(e)}"
 
 def generate_market_forecast():
+    from datetime import datetime   
+
     # Load the last 2 daily summaries
     try:
         with open("daily_summaries.txt", "r") as f:
@@ -231,7 +233,7 @@ Write a short market forecast for the next trading day. Include:
 """
     try:
         response = client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-4o",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.3,
         )
