@@ -480,7 +480,7 @@ Write a 2–3 sentence rationale in confident, hedge-fund-style language.
 """
     try:
         resp = client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-4o",
             messages=[{"role":"user","content":prompt}],
             temperature=0.3,
         )
