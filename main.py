@@ -557,6 +557,26 @@ def top_pick():
     # ──────────────────────────────────────────────────────────────────────────
 
     return "Top pick posted to Discord and saved to file!"
+
+@app.route('/forecast')
+def forecast():
+    token = request.args.get('token')
+    if token != os.getenv("BOT_SECRET_TOKEN"):
+        return "Access denied. Invalid token.", 403
+
+    forecast_text = generate_market_forecast()
+    if not forecast_text or "GPT error" in forecast_text:
+        return "No forecast generated."
+
+    # 1) Send to Discord
+    send_to_discord("🔮 **GPT Market Forecast for Tomorrow**\n" + forecast_text)
+
+    # 2) Log to forecast_log.txt
+    with open("forecast_log.txt", "a") as f:
+        f.write(f"\n\n🗓️ {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+        f.write(forecast_text + "\n")
+
+    return "Forecast posted to Discord and saved!"
         
 if __name__ == "__main__":
     # Only run the web server when you call `python main.py` directly
