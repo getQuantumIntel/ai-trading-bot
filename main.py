@@ -505,7 +505,10 @@ def top_pick():
 
     return "Top pick posted to Discord and saved to file!"
         
-app.run(host='0.0.0.0', port=8080)
+if __name__ == "__main__":
+    # Only run the web server when you call `python main.py` directly
+    app.run(host='0.0.0.0', port=8080)
+
 
 
 
