@@ -1,0 +1,59 @@
+name: Daily Pipeline
+
+on:
+  schedule:
+    - cron: '30 12 * * 1-5'   # 08:30 ET Mon–Fri → 12:30 UTC
+  workflow_dispatch:
+
+jobs:
+  daily:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Cache pip
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run market scan & log signals
+        run: python run_bot_script.py
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          OPENAI_API_KEY:    ${{ secrets.OPENAI_API_KEY }}
+          BOT_SECRET_TOKEN:  ${{ secrets.BOT_SECRET_TOKEN }}
+
+      - name: Post daily summary
+        run: python summary_script.py
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          OPENAI_API_KEY:    ${{ secrets.OPENAI_API_KEY }}
+          BOT_SECRET_TOKEN:  ${{ secrets.BOT_SECRET_TOKEN }}
+
+      # Optional: fire forecast and top-pick in the same run
+      - name: Post forecast
+        run: python forecast_script.py
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          OPENAI_API_KEY:    ${{ secrets.OPENAI_API_KEY }}
+          BOT_SECRET_TOKEN:  ${{ secrets.BOT_SECRET_TOKEN }}
+
+      - name: Post top pick
+        run: python top_pick_script.py
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          OPENAI_API_KEY:    ${{ secrets.OPENAI_API_KEY }}
+          BOT_SECRET_TOKEN:  ${{ secrets.BOT_SECRET_TOKEN }}
